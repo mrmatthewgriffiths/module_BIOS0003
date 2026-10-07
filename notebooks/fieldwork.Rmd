@@ -1,0 +1,64 @@
+---
+title: "BIOS0003 Field Work 2026-10-07"
+output: 
+  html_notebook:
+    fig_caption: yes
+    math_method:
+      engine: mathjax
+      url: "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Code setup
+
+*I use this in all Rmd files*
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(tinytable)
+library(vegan)
+
+# Set global figure dimensions (e.g., 8 inches wide by 5 inches high)
+knitr::opts_chunk$set(
+  fig.width = 4, 
+  fig.height = 4,
+  fig.align = "center" # Automatically centers all plots in the preview
+)
+
+options(tinytable_html_mathjax = TRUE)
+theme_set(theme_minimal(base_size = 14, base_family = "Helvetica"))
+```
+
+## Species Accumulation Curve
+
+### Load the data
+
+```{r}
+df = read_csv("../data/in/field_work_pivoted.csv")
+df
+```
+
+**replace na**
+
+```{r}
+df <- df %>% 
+  mutate(across(everything(), ~ replace_na(.x, 0)))
+```
+
+
+```{r}
+accum <- specaccum(df, method = "random")
+accum
+```
+
+```{r}
+plot(accum, ci.type = "polygon", ci.col = "lightblue",
+     main = "Species Accumulation Curve",
+     xlab = "Quadrats", ylab = "Species Richness")
+```
+
+
+
+
