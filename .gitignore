@@ -2,6 +2,8 @@
 renv/
 
 .DS_store
+README.html
+notebooks/*.html
 
 # History files
 .Rhistory
