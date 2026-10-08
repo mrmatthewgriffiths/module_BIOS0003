@@ -1,0 +1,66 @@
+habitat,habitat_grid_number,overall_grid_number,square_type,Species
+Wetland,6,1,small,Common reed
+Wetland,6,1,small,Puccinia convovuli
+Wetland,6,1,large,Common reed
+Wetland,6,1,large,Puccinia convovuli
+Wetland,6,1,large,Hedge bindweek
+Wetland,6,1,large,Himalayan balsam
+Wetland,6,1,large,Xylaria hypoxyion
+Wetland,6,1,large,Stinging nettles
+Woodland,16,2,small,Common reed
+Woodland,16,2,large,Common reed
+Woodland,16,2,large,Brambles
+Woodland,16,2,large,Lichens
+Woodland,16,2,large,Grass
+Woodland,16,2,large,Vining plant
+Woodland,16,2,large,Red leaf tree
+Woodland,16,2,large,Dandelion weed
+Woodland,21,3,small,Common reed
+Woodland,21,3,large,Common reed
+Woodland,21,3,large,Cherry plum
+Woodland,21,3,large,Himalayan balsam
+Woodland,21,3,large,Hanging sedge
+Woodland,21,3,large,Great stinging nettles
+Woodland,21,3,large,White willow
+Woodland,21,3,large,White fungus
+Built,23,4,small,Grass
+Built,23,4,large,Grass
+Built,23,4,large,Greater knapweed
+Built,23,4,large,Vipers bugloss
+Built,23,4,large,Wild cherry
+Built,23,4,large,Brambles
+Built,23,4,large,Spiny restharrow
+Built,23,4,large,Bristly oxtongue
+Built,23,4,large,Weeds
+Built,5,5,small,Grass
+Built,5,5,small,Tropical horseweed
+Built,5,5,small,Bristly oxtongue
+Built,5,5,small,Weeds
+Built,5,5,large,Grass
+Built,5,5,large,Tropical horseweed
+Built,5,5,large,Bristly oxtongue
+Built,5,5,large,Wild carrot
+Built,5,5,large,Bull wistly
+Built,5,5,large,Greater knapweed
+Built,5,5,large,Wild cherry
+Built,5,5,large,Lichens
+Built,5,5,large,Roundleaf geranium
+Built,5,5,large,Reflexed stonecop
+Built,5,5,large,Weeds
+Meadow Slope,31,6,small,Grass
+Meadow Slope,31,6,large,Grass
+Meadow Slope,31,6,large,Scotch broom
+Meadow Slope,31,6,large,red/brown thorny stem+green leaves
+Meadow,23,7,small,Grass
+Meadow,23,7,large,Grass
+Meadow,23,7,large,White clover
+Meadow,23,7,large,Hook lobed dandelions
+Meadow,23,7,large,Spiny restharrow
+Meadow,23,7,large,Dried plants
+Meadow,15,8,small,Grass
+Meadow,15,8,small,Hook lobed dandelions
+Meadow,15,8,small,White clover
+Meadow,15,8,large,Grass
+Meadow,15,8,large,Hook lobed dandelions
+Meadow,15,8,large,White clover
+Meadow,15,8,large,Golovinomyces sordidus

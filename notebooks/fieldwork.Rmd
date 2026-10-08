@@ -1,5 +1,5 @@
 ---
-title: "BIOS0003 Field Work 2026-10-07"
+title: "BIOS0003 Field Work (conducted on 2026-10-07)"
 output: 
   html_notebook:
     fig_caption: yes
@@ -10,15 +10,14 @@ editor_options:
   chunk_output_type: inline
 ---
 
-## Code setup
+## 1 Code setup
 
-*I use this in all Rmd files*
+*I use something like this in all Rmd files*
 
 ```{r}
 library(tidyverse)
 library(ggplot2)
 library(tinytable)
-library(vegan)
 
 # Set global figure dimensions (e.g., 8 inches wide by 5 inches high)
 knitr::opts_chunk$set(
@@ -31,33 +30,118 @@ options(tinytable_html_mathjax = TRUE)
 theme_set(theme_minimal(base_size = 14, base_family = "Helvetica"))
 ```
 
-## Species Accumulation Curve
+--- 
 
-### Load the data
+## 2 Data Cleaning and Prep
+
+To clean and prepare the data I took the following steps: 
+
+1. I took the list from the list Maddy created in this [google doc](https://docs.google.com/document/d/1ayEZ5W-id2mDLf8K16_WwtTJwzxPaptZ_ai-xaE0v5s/edit?tab=t.0) and added it to this [google sheet](https://docs.google.com/spreadsheets/d/1wY-feIpz5OgWtJsYgT1v5Mk01S2WGyqa1xK2fIkk68g/edit?gid=0#gid=0).
+1. I then munged the data so that there was complete data for the following columns: 
+    1. Habitat
+    1. Habitat grid number (taken from the diagram we have)
+    1. Square type (either Small or Large)
+    1. Species (the observed Species)
+1. I then worked to identify species that had the same name but spelt differently and identified the following: 
+    1. Grass and Grasses - both changed to Grass
+    1. Hook lobed dandelions and Hooked lobed dandelions - both changed to Hook lobed dandelions
+    1. Wild cherry and Wild cherry tree - both changed to Wild cherry
+1. Assigned an Overall Grid Number (from 1 to 8) to each grid
+
+The output is stored here
+
+*./data/in/field_work_data_cleaned.csv*
+
+Now we can load the data into a dataframe
 
 ```{r}
-df = read_csv("../data/in/field_work_pivoted.csv")
+df = read_csv("../data/in/field_work_data_cleaned.csv", show_col_types = FALSE)
 df
 ```
 
-**replace na**
+---
+
+## 3 Overall Species Accumulation Curve 
+
+>First, lets do this manually
+
+we are going to need a data frame to hold the species accumulation data:
 
 ```{r}
-df <- df %>% 
-  mutate(across(everything(), ~ replace_na(.x, 0)))
+df_accum <- tibble(
+  survey_unit = c(0:8), # start at 0 and 8 sample units, overall_grid_number
+  species_accum = rep(0, 9) # set species accumulation to 0 to start
+)
+df_accum
 ```
 
+We also need a list to hold the species we have seen in total, well work through the sample units adding new species to this list and updating the species_accum in the dataframe above.
 
 ```{r}
-accum <- specaccum(df, method = "random")
-accum
+species_all = c()
 ```
 
+Lets do the first sample unit (overall_grid_number = 1) manually...
+
 ```{r}
-plot(accum, ci.type = "polygon", ci.col = "lightblue",
-     main = "Species Accumulation Curve",
-     xlab = "Quadrats", ylab = "Species Richness")
+# Pull a distinct list of species seen in ogn 1
+species_ogn <- df |> 
+  filter(overall_grid_number == 1) |> 
+  distinct(Species) |> 
+  pull(Species)
+
+# Add only new ones to the species_all vector
+species_all = union(species_all, species_ogn)
+
+# Count how many species we have all together 
+species_count = length(species_all)
+
+# Update the df_accum data table for ogn = 1
+# Note: we're using 1 + 1 here as we started at 0
+df_accum$species_accum[1 + 1] <- species_count
+
+df_accum
 ```
+
+Now we have done that once, lets loop through the rest of the sample units and fill up the data frame:
+
+```{r}
+# Loop through the remaing ogn's from 2 to 8
+for (ogn in 2:8) {
+  # Then just do the same as we did for ogn = 1
+  species_ogn <- df |> 
+    filter(overall_grid_number == ogn) |> 
+    distinct(Species) |> 
+    pull(Species)
+
+  # Add only new ones to the species_all vector
+  species_all = union(species_all, species_ogn)
+  
+  # Count how many species we have all together 
+  species_count = length(species_all)
+  
+  # Update the df_accum data table for ogn = 1
+  df_accum$species_accum[ogn + 1] <- species_count
+}
+
+df_accum
+```
+
+And now let's plot this curve:
+
+```{r}
+df_accum |> 
+  ggplot(mapping = aes(x = survey_unit, y = species_accum)) +
+    geom_point() +
+    stat_smooth(method = "loess", formula = "y ~ x") +
+    labs(
+      title = "Species Accumulation Curve",
+      x = "Survey Unit (Overall Grid Number)",
+      y = "Accumulated Species Count"
+    )
+```
+
+**!!Boom, we have our first species accumulation curve!!**
 
 
 

@@ -1,6 +1,8 @@
 # ENV
 renv/
 
+.DS_store
+
 # History files
 .Rhistory
 .Rapp.history
