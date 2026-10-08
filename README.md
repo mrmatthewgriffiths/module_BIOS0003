@@ -24,6 +24,14 @@ Open the project in R studio and in the Console run
 renv::restore()
 ```
 
-
 ## Fieldwork 2026-10-07
 
+To view the R notebook for the Fieldwork open the file in RStudio:
+
+```
+notebooks/fieldwork.Rmd
+```
+
+Then from the "Run" menu at the top of the file, choose Run All, you should see the output of the R code inline in the notebook.
+
+*Note: if you're not familier with R Notebooks there are loads of primers online*
