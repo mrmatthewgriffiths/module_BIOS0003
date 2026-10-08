@@ -28,6 +28,8 @@ knitr::opts_chunk$set(
 
 options(tinytable_html_mathjax = TRUE)
 theme_set(theme_minimal(base_size = 14, base_family = "Helvetica"))
+
+rmarkdown::render(output_file = "your_file.html")
 ```
 
 --- 
