@@ -17,7 +17,7 @@ editor_options:
 ```{r}
 library(tidyverse)
 library(ggplot2)
-library(tinytable)
+library(gtools)
 
 # Set global figure dimensions (e.g., 8 inches wide by 5 inches high)
 knitr::opts_chunk$set(
@@ -28,8 +28,6 @@ knitr::opts_chunk$set(
 
 options(tinytable_html_mathjax = TRUE)
 theme_set(theme_minimal(base_size = 14, base_family = "Helvetica"))
-
-rmarkdown::render(output_file = "your_file.html")
 ```
 
 --- 
@@ -145,6 +143,174 @@ df_accum |>
 
 **!!Boom, we have our first species accumulation curve!!**
 
+---
 
+## 4 But wait ... what if we change the order of sample units?
 
+Will it affect the graph if instead of adding the species observations from the sample units in order (from 1 to 8), we randomise the order in which we add them?
 
+First, lets wrap up our core logic in a function so we can easily reuse it:
+
+```{r}
+
+process_sample_unit_species <- function(df, ogn, species_all) {
+  # Extract the unique species for this ogn
+  species_ogn <- df |> 
+    filter(overall_grid_number == ogn) |> 
+    distinct(Species) |> 
+    pull(Species)
+
+  # Add only new ones to the species_all vector
+  species_all = union(species_all, species_ogn)
+  
+  # Count how many species we have all together 
+  species_count = length(species_all)
+  
+  return(list(
+    "species_all" = species_all,
+    "species_count" = species_count
+  ))
+}
+
+```
+
+Now we can easily rerun the analysis but using the numbers 1 through 8 in random order:
+
+```{r}
+
+# set up the df to store the data
+# NOTE: we're now using just a count of sampled areas: sampled_area_count or sac
+df_accum <- tibble(
+  sampled_area_count = c(0:8), # now we're not using direct ogn we're using sac
+  species_accum = rep(0, 9) # set species accumulation to 0 to start
+)
+species_all = c()
+
+# I'm setting the seed here so that sample produces the same random order each
+# time this code block is run - you can remove this and see the graph change!
+set.seed(42)
+
+sac = 1
+for (ogn in sample(seq(1, 8), 8)) {
+  accum_data <- process_sample_unit_species(
+    df = df, 
+    ogn = ogn, 
+    species_all = species_all)
+  
+  species_all <- accum_data$species_all
+  species_count <- accum_data$species_count
+  
+  # Update the df_accum data table WITH THE SAC, not the ogn
+  df_accum$species_accum[sac + 1] <- species_count
+  
+  sac <- sac + 1
+}
+df_accum |> 
+  ggplot(mapping = aes(x = sampled_area_count, y = species_accum)) +
+    geom_point() +
+    stat_smooth(method = "loess", formula = "y ~ x") +
+    labs(
+      title = "Species Accumulation Curve",
+      x = "Number of Units Sampled",
+      y = "Accumulated Species Count"
+    )
+```
+
+**!!WOW that looks pretty different!!**
+
+## 5 Calculating all possible combinations 
+
+So if the order in which we process the sample units matter, we should really look at all possible permutations.
+
+We can use the permutations function from the gtools library to help here ... but ...
+
+first we should wrap up our code from the last cell so that we can look over it for each permutation.
+
+```{r}
+process_sameple_area_permutation <- function(area_permutation, permutation_id) {
+  # a df to hold the data for this permutation
+  df_accum <- tibble(
+    permutation_id = rep(permutation_id, 9), # so we can differentiate perms
+    sampled_area_count = c(0:8), 
+    species_accum = rep(0, 9) 
+  )
+  
+  # Variables for each run 
+  species_all = c()
+  sac = 1
+  
+  # Perform the loop for this permutation
+  for (ogn in area_permutation) {
+    accum_data <- process_sample_unit_species(
+      df = df, 
+      ogn = ogn, 
+      species_all = species_all)
+    
+    species_all <- accum_data$species_all
+    species_count <- accum_data$species_count
+    
+    # Update the df_accum data table with the sac
+    df_accum$species_accum[sac + 1] <- species_count
+    
+    sac <- sac + 1
+  }
+  
+  # Return the de_accum for this permutation
+  return(df_accum)
+}
+
+```
+
+Now we have that locked down we can create the permutations matrix to hold everything and run the full simulations
+
+```{r}
+# If we don't limit this, it will be 40320!
+number_of_perms_required = 1e4
+
+all_perms <- permutations(n = 8, r = 8, v = 1:8)
+
+# set.seed(123) # Optional: ensures reproducibility
+random_indices <- sample(nrow(all_perms), size = number_of_perms_required)
+
+# 3. Subset the matrix
+sampled_perms <- all_perms[random_indices, ]
+
+df_perms <- tibble(
+  perm = sampled_perms,
+  perm_id = 1:length(sampled_perms[,1])
+)
+
+df_accum <- df_perms |> 
+  rowwise() |> 
+  reframe(process_sameple_area_permutation(perm, perm_id))
+```
+
+Now we have done the Monti Carlo siimulations, we can graph it out
+
+```{r}
+df_accum |>
+  ggplot(mapping = aes(x = sampled_area_count)) +
+    geom_smooth(
+      aes(y = species_accum, group = permutation_id),
+      method = "loess", 
+      formula = y ~ x, 
+      se = FALSE, 
+      alpha = 0.1, 
+      colour = "grey", 
+      linewidth = 0.01) +
+    geom_smooth(
+      aes(y = species_accum),
+      method = "loess",
+      formula = y ~ x, 
+      se = FALSE, 
+      alpha = 0.1, 
+      colour = "steelblue", 
+      linewidth = 1
+    ) +
+    labs(
+      title = "Species Accumulation Curves",
+      x = "Number of Units Sampled",
+      y = "Accumulated Species Count"
+    )
+```
+**Now that's cool**
