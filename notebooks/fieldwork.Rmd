@@ -263,6 +263,8 @@ process_sameple_area_permutation <- function(area_permutation, permutation_id) {
 
 Now we have that locked down we can create the permutations matrix to hold everything and run the full simulations
 
+> Note that this will take a bit to run even though we're only running 1000 random permutations
+
 ```{r}
 # If we don't limit this, it will be 40320!
 number_of_perms_required = 1e4
@@ -285,7 +287,7 @@ df_accum <- df_perms |>
   reframe(process_sameple_area_permutation(perm, perm_id))
 ```
 
-Now we have done the Monti Carlo siimulations, we can graph it out
+Now we have done the Monte Carlo simulations, we can graph it out
 
 ```{r}
 df_accum |>
