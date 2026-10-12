@@ -61,7 +61,7 @@ df
 
 ---
 
-## 3 Overall Species Accumulation Curve 
+## 3.1 Overall Species Accumulation Curve 
 
 >First, lets do this manually
 
@@ -145,7 +145,7 @@ df_accum |>
 
 ---
 
-## 4 But wait ... what if we change the order of sample units?
+## 3.2 But wait ... what if we change the order of sample units?
 
 Will it affect the graph if instead of adding the species observations from the sample units in order (from 1 to 8), we randomise the order in which we add them?
 
@@ -218,7 +218,7 @@ df_accum |>
 
 **!!WOW that looks pretty different!!**
 
-## 5 Calculating all possible combinations 
+## 3.3 Calculating all possible combinations 
 
 So if the order in which we process the sample units matter, we should really look at all possible permutations.
 
@@ -316,3 +316,54 @@ df_accum |>
     )
 ```
 **Now that's cool**
+
+## 4 We can also look at the correlations between sample unit and species
+
+Lets pivot the data to get a matrix of presence and absense 
+
+```{r}
+df_presence <- df |> 
+  distinct(habitat, Species) |> 
+  mutate(presence = 1) |> 
+  complete(habitat, Species, fill = list(presence = 0)) |> 
+  mutate(
+    # Sort Species on y-axis: least overall abundance at bottom, most at top
+    Species = fct_reorder(Species, presence, sum, .desc = TRUE),
+    
+    # Sort Habitat on x-axis: most biodiversity on left, least on right
+    habitat = fct_reorder(habitat, presence, sum, .desc = TRUE),
+    
+    # Convert present to factor for plotting
+    presence = factor(presence)
+  )
+
+df_presence
+```
+
+```{r}
+ggplot(
+  df_presence,
+  aes(x = habitat, y = Species, fill = presence) 
+) + 
+  geom_tile(color = "white", linewidth = 0.5) + 
+  scale_fill_manual(
+    values = c("0" = "whitesmoke", "1" = "forestgreen"), 
+    labels = c("Absent (0)", "Present (1)"),
+    name = "Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    axis.text.y = element_text(size = 5)
+  ) +
+  labs(
+    title = "Species Presence/Absence Across Habitats",
+    x = "Species",
+    y = "Habitat"
+  )
+```
+
+
+
+
+
